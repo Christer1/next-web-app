@@ -11,32 +11,33 @@ interface props {
     slug: string;
 }
 
-const EventCard = ({title, image, date, time, location, description, slug}: props) => {
+const EventCard = ({ title, image, date, time, location, description, slug }: props) => {
 
     return (
-        <Link href={`/events/${slug}`}>
-            <Image src={image} alt={title} width={410} height={300} className="poster" />
-            
-            <div className="flex flex-row gap-2">
-            <Image src="/icons/pin.svg" alt="location" width={14} height={14} />
-            <p>{location}</p>                
-            </div>
+        <Link href={`/events/${slug}`} className="flex flex-col gap-3 group">
+            <Image src={image} alt={title} width={410} height={240} className="w-full h-[240px] rounded-[16px] object-cover" />
 
-            <p className="title">{title}</p>
-
-            <div className="datetime">
-                <div className="flex flex-row gap-2">
-                    <Image src="/icons/calendar.svg" alt="date" width={14} height={14} />
-                    <p>{date}</p>
+            <div className="flex flex-col gap-1.5 px-0.5">
+                <div className="flex flex-row items-center gap-1.5 text-[13px] text-zinc-400">
+                    <Image src="/icons/pin.svg" alt="location" width={12} height={12} className="opacity-80" />
+                    <p>{location}</p>
                 </div>
-                <div className="flex flex-row gap-2">
-                    <Image src="/icons/clock.svg" alt="time" width={14} height={14} />
-                    <p>{time}</p>
+
+                <p className="text-[17px] font-semibold text-zinc-100 tracking-tight">{title}</p>
+
+                <div className="flex flex-row items-center gap-4 text-[13px] text-zinc-400 font-medium mt-0.5">
+                    <div className="flex flex-row items-center gap-1.5">
+                        <Image src="/icons/calendar.svg" alt="date" width={12} height={12} className="opacity-80" />
+                        <p>{date}</p>
+                    </div>
+                    <div className="flex flex-row items-center gap-1.5">
+                        <Image src="/icons/clock.svg" alt="time" width={12} height={12} className="opacity-80" />
+                        <p>{time}</p>
+                    </div>
                 </div>
             </div>
-                
         </Link>
     )
 }
 
-export  default EventCard;
+export default EventCard;
