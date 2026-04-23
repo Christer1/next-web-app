@@ -1,45 +1,37 @@
-import React from 'react';
-import ExploreBtn from '@/components/ExploreBtn';
-import EventCard from '@/components/EventCard';
-import { IEvent } from '@/database/event.model';
-import { cacheLife } from 'next/cache';
+import ExploreBtn from "@/components/ExploreBtn";
+import EventCard from "@/components/EventCard";
+import {IEvent} from "@/database/event.model";
+import { cacheLife } from "next/cache";
+import { events } from "@/lib/constants";
 
-const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
-const Home = async () => {
-  'use cache'
-  cacheLife('hours');
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
-  let events: IEvent[] = [];
-  try {
-    const response = await fetch(`${API_URL}/api/events`);
-    if (!response.ok) {
-      console.error("Failed to load events");
-    } else {
-      const data = await response.json();
-      events = data.events || [];
-    }
-  } catch (error) {
-    console.error("Error fetching events:", error);
-  }
-  return (
+const Page = async () => {
+    'use cache';
+    cacheLife('hours')
+    // const response = await fetch(`${BASE_URL}/api/events`);
+    // const { events } = await response.json();
 
-    <section>
-      <h1 className='text-center'>The Hub for Every Dev <br /> Event You Can&apos;t Miss</h1>
-      <p className='text-center mt-5'>Discover and join the best tech events around you</p>
-      <ExploreBtn />
+    return (
+        <section>
+            <h1 className="text-center">The Hub for Every Dev <br /> Event You Can't Miss</h1>
+            <p className="text-center mt-5">Hackathons, Meetups, and Conferences, All in One Place</p>
 
-      <div className='mt-20 space-y-7'>
-        <h3>Featured Events</h3>
+            <ExploreBtn />
 
-        <ol className='events'>
-          {events.map((event: IEvent) => (
-            <li key={event.title }><EventCard {...event} /></li>
-          ))}
-        </ol>
-      </div>
+            <div className="mt-20 space-y-7">
+                <h3>Featured Events</h3>
 
-    </section>
-
-  )
+                <ul className="events">
+                    {events && events.length > 0 && events.map((event: IEvent) => (
+                        <li key={event.title} className="list-none">
+                            <EventCard {...event} />
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </section>
+    )
 }
-export default Home
+
+export default Page;
