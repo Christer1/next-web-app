@@ -1,12 +1,11 @@
-import { notFound } from "next/navigation";
 import Image from "next/image";
 import BookEvent from "@/components/BookEvent";
 import { getSimilarEventsBySlug } from "@/lib/actions/event.actions";
 import { IEvent } from "@/database/event.model";
 import EventCard from "@/components/EventCard";
-import { cacheLife } from "next/cache";
+import {eventData} from '@/lib/constants';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+// const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 const EventDetailsItem = ({
   icon,
@@ -50,19 +49,19 @@ const EventAgenda = ({ agendaItems }: { agendaItems: string[] }) => {
   );
 };
 
-async function getCachedEventData(slug: string) {
-  'use cache';
-  cacheLife('hours');
-  try {
-    const res = await fetch(`${BASE_URL}/api/events/${slug}`);
-    if (!res.ok) return null;
-    const body = await res.json();
-    if (!body || !body.event) return null;
-    return body.event;
-  } catch (error) {
-    return null;
-  }
-}
+// async function getCachedEventData(slug: string) {
+//   'use cache';
+//   cacheLife('hours');
+//   try {
+//     const res = await fetch(`${BASE_URL}/api/events/${slug}`);
+//     if (!res.ok) return null;
+//     const body = await res.json();
+//     if (!body || !body.event) return null;
+//     return body.event;
+//   } catch (error) {
+//     return null;
+//   }
+// }
 
 const EventDetailsPage = async ({
   params,
@@ -71,10 +70,10 @@ const EventDetailsPage = async ({
 }) => {
   const { slug } = await params;
   
-  const eventData = await getCachedEventData(slug);
-  if (!eventData) {
-    notFound();
-  }
+  // const eventData = await getCachedEventData(slug);
+  // if (!eventData) {
+  //   notFound();
+  // }
 
   const similarEvents: IEvent[]  = await getSimilarEventsBySlug(slug);
   const booking = 10;

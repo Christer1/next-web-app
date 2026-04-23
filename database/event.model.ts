@@ -146,25 +146,19 @@ const eventSchema = new Schema<IEvent>(
 // Enforce a globally unique URL slug for stable event routes.
 eventSchema.index({ slug: 1 }, { unique: true })
 
-eventSchema.pre("save", function (next) {
-  try {
-    // Regenerate slug only when the event title changes.
-    if (this.isModified("title")) {
-      const slug = toSlug(this.title)
-      if (!slug) {
-        throw new Error("title must contain valid slug characters")
-      }
-      this.slug = slug
+eventSchema.pre("save", function () {
+  // Regenerate slug only when the event title changes.
+  if (this.isModified("title")) {
+    const slug = toSlug(this.title)
+    if (!slug) {
+      throw new Error("title must contain valid slug characters")
     }
-
-    // Normalize date/time values into predictable storage formats.
-    this.date = normalizeDate(this.date)
-    this.time = normalizeTime(this.time)
-
-    // next()
-  } catch (error) {
-    // next(error as Error)
+    this.slug = slug
   }
+
+  // Normalize date/time values into predictable storage formats.
+  this.date = normalizeDate(this.date)
+  this.time = normalizeTime(this.time)
 })
 
 const existingEventModel = mongoose.models.Event as EventModel | undefined

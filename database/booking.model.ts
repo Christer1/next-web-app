@@ -38,19 +38,13 @@ const bookingSchema = new Schema<IBooking>(
 // Supports common lookups such as fetching all bookings for a specific event.
 bookingSchema.index({ eventId: 1 })
 
-bookingSchema.pre("save", async function (next) {
-  try {
-    // Ensure each booking references a real event document before persisting.
-    if (this.isNew || this.isModified("eventId")) {
-      const eventExists = await Event.exists({ _id: this.eventId })
-      if (!eventExists) {
-        throw new Error("Referenced event does not exist")
-      }
+bookingSchema.pre("save", async function () {
+  // Ensure each booking references a real event document before persisting.
+  if (this.isNew || this.isModified("eventId")) {
+    const eventExists = await Event.exists({ _id: this.eventId })
+    if (!eventExists) {
+      throw new Error("Referenced event does not exist")
     }
-
-    // next()
-  } catch (error) {
-    // next(error as Error)
   }
 })
 
