@@ -1,6 +1,7 @@
-import mongoose, { Model, Schema } from "mongoose"
+import mongoose, { Model, Schema, Types } from "mongoose"
 
 export interface IEvent {
+  _id?: Types.ObjectId
   title: string
   slug: string
   description: string
@@ -79,13 +80,15 @@ const normalizeTime = (value: string): string => {
   return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`
 }
 
-const toSlug = (value: string): string =>
-  value
+const toSlug = (value: string): string => {
+  const baseSlug = value
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, "")
     .replace(/[\s_-]+/g, "-")
     .replace(/^-+|-+$/g, "")
+  return `${baseSlug}-${Math.random().toString(36).substring(2, 8)}`
+}
 
 const eventSchema = new Schema<IEvent>(
   {
@@ -158,9 +161,9 @@ eventSchema.pre("save", function (next) {
     this.date = normalizeDate(this.date)
     this.time = normalizeTime(this.time)
 
-    next()
+    // next()
   } catch (error) {
-    next(error as Error)
+    // next(error as Error)
   }
 })
 
