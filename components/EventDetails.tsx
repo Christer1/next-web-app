@@ -9,6 +9,23 @@ import {cacheLife} from "next/cache";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
+const normalizeList = (list: string | string[]): string[] => {
+    if (!list) return [];
+    if (typeof list === 'string') {
+        try { return JSON.parse(list); } catch { return list.split(',').map(i => i.trim()); }
+    }
+    // Handle corrupted array `['["AI"', '"ML"]']` from NextJS formData parsing issue
+    if (list.length > 0 && typeof list[0] === 'string' && list[0].startsWith('["')) {
+        try {
+            return JSON.parse(list.join(','));
+        } catch {
+            return list.map(item => item.replace(/^\[?"?|"?\]?$/g, '').trim());
+        }
+    }
+    // Default fallback to clean lingering artifacts on existing items
+    return list.map(item => typeof item === 'string' ? item.replace(/^\[?"?|"?\]?$/g, '').trim() : item);
+}
+
 const EventDetailItem = ({ icon, alt, label }: { icon: string; alt: string; label: string; }) => (
     <div className="flex-row-gap-2 items-center">
         <Image src={icon} alt={alt} width={17} height={17} />
@@ -16,24 +33,30 @@ const EventDetailItem = ({ icon, alt, label }: { icon: string; alt: string; labe
     </div>
 )
 
-const EventAgenda = ({ agendaItems }: { agendaItems: string[] }) => (
-    <div className="agenda">
-        <h2>Agenda</h2>
-        <ul>
-            {agendaItems.map((item) => (
-                <li key={item}>{item}</li>
-            ))}
-        </ul>
-    </div>
-)
+const EventAgenda = ({ agendaItems }: { agendaItems: string[] }) => {
+    const cleanAgenda = normalizeList(agendaItems);
+    return (
+        <div className="agenda">
+            <h2>Agenda</h2>
+            <ul>
+                {cleanAgenda.map((item) => (
+                    <li key={item}>{item}</li>
+                ))}
+            </ul>
+        </div>
+    );
+}
 
-const EventTags = ({ tags }: { tags: string[] }) => (
-    <div className="flex flex-row gap-1.5 flex-wrap">
-        {tags.map((tag) => (
-            <div className="pill" key={tag}>{tag}</div>
-        ))}
-    </div>
-)
+const EventTags = ({ tags }: { tags: string[] }) => {
+    const cleanTags = normalizeList(tags);
+    return (
+        <div className="flex flex-row gap-1.5 flex-wrap">
+            {cleanTags.map((tag) => (
+                <div className="pill" key={tag}>{tag}</div>
+            ))}
+        </div>
+    );
+}
 
 import { connectToDatabase } from "@/lib/mongodb";
 import { Event } from "@/database/event.model";
