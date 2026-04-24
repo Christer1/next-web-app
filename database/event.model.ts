@@ -1,6 +1,7 @@
-import mongoose, { Model, Schema } from "mongoose"
+import mongoose, { Model, Schema, Types } from "mongoose"
 
 export interface IEvent {
+  _id?: Types.ObjectId
   title: string
   slug: string
   description: string
@@ -79,13 +80,15 @@ const normalizeTime = (value: string): string => {
   return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`
 }
 
-const toSlug = (value: string): string =>
-  value
+const toSlug = (value: string): string => {
+  const baseSlug = value
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, "")
     .replace(/[\s_-]+/g, "-")
     .replace(/^-+|-+$/g, "")
+  return `${baseSlug}-${Math.random().toString(36).substring(2, 8)}`
+}
 
 const eventSchema = new Schema<IEvent>(
   {
@@ -143,25 +146,19 @@ const eventSchema = new Schema<IEvent>(
 // Enforce a globally unique URL slug for stable event routes.
 eventSchema.index({ slug: 1 }, { unique: true })
 
-eventSchema.pre("save", function (next) {
-  try {
-    // Regenerate slug only when the event title changes.
-    if (this.isModified("title")) {
-      const slug = toSlug(this.title)
-      if (!slug) {
-        throw new Error("title must contain valid slug characters")
-      }
-      this.slug = slug
+eventSchema.pre("save", function () {
+  // Regenerate slug only when the event title changes.
+  if (this.isModified("title")) {
+    const slug = toSlug(this.title)
+    if (!slug) {
+      throw new Error("title must contain valid slug characters")
     }
-
-    // Normalize date/time values into predictable storage formats.
-    this.date = normalizeDate(this.date)
-    this.time = normalizeTime(this.time)
-
-    next()
-  } catch (error) {
-    next(error as Error)
+    this.slug = slug
   }
+
+  // Normalize date/time values into predictable storage formats.
+  this.date = normalizeDate(this.date)
+  this.time = normalizeTime(this.time)
 })
 
 const existingEventModel = mongoose.models.Event as EventModel | undefined
