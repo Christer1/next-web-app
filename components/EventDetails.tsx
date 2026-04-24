@@ -35,6 +35,9 @@ const EventTags = ({ tags }: { tags: string[] }) => (
     </div>
 )
 
+import { connectToDatabase } from "@/lib/mongodb";
+import { Event } from "@/database/event.model";
+
 const EventDetails = async ({ params }: { params: Promise<string> }) => {
     'use cache'
     cacheLife('hours');
@@ -42,23 +45,12 @@ const EventDetails = async ({ params }: { params: Promise<string> }) => {
 
     let event;
     try {
-        const request = await fetch(`${BASE_URL}/api/events/${slug}`, {
-            next: { revalidate: 60 }
-        });
-
-        if (!request.ok) {
-            if (request.status === 404) {
-                return notFound();
-            }
-            throw new Error(`Failed to fetch event: ${request.statusText}`);
-        }
-
-        const response = await request.json();
-        event = response.event;
-
-        if (!event) {
+        await connectToDatabase();
+        const eventRaw = await Event.findOne({ slug }).lean();
+        if (!eventRaw) {
             return notFound();
         }
+        event = JSON.parse(JSON.stringify(eventRaw));
     } catch (error) {
         console.error('Error fetching event:', error);
         return notFound();
